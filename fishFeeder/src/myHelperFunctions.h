@@ -6,6 +6,7 @@
 #include <TimerOne.h>
 #include <TimeLib.h>
 #include <TimeAlarms.h>
+#include <BasicStepperDriver.h>
 
 
 //////////////////////////////////////////////////
@@ -13,12 +14,13 @@
 //////////////////////////////////////////////////
 int checkEncoder();
 void prepText(int, int, int);
-void setHour();
-void setMinute();
+int setTime(int, String);
+// void setMinute();
 void myAlarm();
 void digitalClockDisplay();
 String printDigits(int);
 void timerIsr();
+void setMyTime();
 
 //////////////////////////////////////////////////
 // OLED Stuff
@@ -41,3 +43,34 @@ uint8_t buttonState;
 #define STEPS 4
 
 ClickEncoder encoder(pinA, pinB, pinSw, STEPS);
+
+// //////////////////////////////////////////////////
+// // Global Variables
+// //////////////////////////////////////////////////
+// extern int myHour;
+// extern int myMinute;
+// extern int lastSecond;
+
+
+//////////////////////////////////////////////////
+// Stepper Driver Stuff
+//////////////////////////////////////////////////
+// Motor steps per revolution. Most steppers are 200 steps or 1.8 degrees/step
+#define MOTOR_STEPS 200
+#define RPM 120
+
+// Since microstepping is set externally, make sure this matches the selected mode
+// If it doesn't, the motor will move at a different RPM than chosen
+// 1=full step, 2=half step etc.
+#define MICROSTEPS 1
+
+// All the wires needed for full functionality
+#define DIR 8
+// #define STEP 9
+#define STEP LED_BUILTIN
+
+//Uncomment line to use enable/disable functionality
+//#define SLEEP 13
+
+// 2-wire basic config, microstepping is hardwired on the driver
+BasicStepperDriver stepper(MOTOR_STEPS, DIR, STEP);

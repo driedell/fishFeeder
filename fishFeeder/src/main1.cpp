@@ -6,28 +6,39 @@
 #include <TimerOne.h>
 #include <TimeLib.h>
 #include <TimeAlarms.h>
+#include <BasicStepperDriver.h>
 
 #include <myHelperFunctions.h>
 
 //////////////////////////////////////////////////
 // Global Variables
 //////////////////////////////////////////////////
-class global {
-    int myHour = 0;
-    int myMinute = 0;
-    int lastSecond = -1;
-};
+int myHour;
+int myMinute;
+int lastSecond = -1;
+int stepsToTurn = 2000;
+
+//////////////////////////////////////////////////
+// Set up timer
+//////////////////////////////////////////////////
+void timerIsr()
+{
+    encoder.service();
+}
 
 //////////////////////////////////////////////////
 // Setup
 //////////////////////////////////////////////////
-void setup() {
+void setup()
+{
     pinMode(LED_BUILTIN, OUTPUT);
 
     Serial.begin(9600);
+    while (!Serial)
+        ;
 
     Timer1.initialize(1000);
-    Timer1.attachInterrupt(timerIsr); 
+    Timer1.attachInterrupt(timerIsr);
 
     encoder.setAccelerationEnabled(false);
     oldEncPos = 0;
@@ -35,11 +46,147 @@ void setup() {
     display.begin(SSD1306_SWITCHCAPVCC);
 
     display.clearDisplay();
-    setHour();
-    setMinute();
+    myHour = setTime(23, "Hour");
+    myMinute = setTime(59, "Minute");
+
     display.clearDisplay();
 
-    Serial.println();    
+    stepper.begin(RPM, MICROSTEPS);
+
+    setMyTime();
+}
+
+//////////////////////////////////////////////////
+// Main Loop
+//////////////////////////////////////////////////
+void loop()
+{
+    int value = checkEncoder();
+    digitalClockDisplay();
+    Alarm.delay(1000);
+
+    if (value != 0)
+    {
+        Serial.println(value);
+    }
+}
+
+//////////////////////////////////////////////////
+// prepText
+//////////////////////////////////////////////////
+void prepText(int x, int y, int size)
+{
+    display.setCursor(x, y);
+    display.setTextColor(WHITE);
+    display.setTextSize(size);
+}
+
+//////////////////////////////////////////////////
+// checkEncoder
+//////////////////////////////////////////////////
+int checkEncoder()
+{
+    encPos -= encoder.getValue();
+    // if value > temp, UP
+    // if value < temp, DOWN
+    int16_t temp = 0;
+
+    if (encPos != oldEncPos)
+    {
+        temp = encPos - oldEncPos;
+        oldEncPos = encPos;
+        return temp;
+    }
+
+    buttonState = encoder.getButton();
+    if (buttonState != 0)
+    {
+        temp = buttonState;
+
+        switch (buttonState)
+        {
+        case ClickEncoder::Open: //0
+            break;
+        case ClickEncoder::Closed: //1
+            break;
+        case ClickEncoder::Pressed: //2
+            break;
+        case ClickEncoder::Held: //3
+            break;
+        case ClickEncoder::Released: //4
+            break;
+        case ClickEncoder::Clicked: //5
+            break;
+        case ClickEncoder::DoubleClicked: //6
+            break;
+        }
+    }
+
+    return temp;
+}
+
+//////////////////////////////////////////////////
+// Set Time
+//////////////////////////////////////////////////
+int setTime(int upperLimit, String timeToSet)
+{
+    Serial.print("Set ");
+    Serial.print(timeToSet);
+    Serial.println(": ");
+
+    int myTime = 0;
+
+    while (1)
+    {
+        int readEncoder = checkEncoder();
+        switch (readEncoder)
+        {
+        case -1:
+        case 1:
+            myTime += readEncoder;
+            if (myTime < 0)
+            {
+                myTime = upperLimit;
+            }
+            else if (myTime > upperLimit)
+            {
+                myTime = 0;
+            }
+            Serial.println(myTime);
+            break;
+        case 5:
+        case 6:
+            return myTime;
+        default:
+            break;
+        }
+
+        display.clearDisplay();
+        prepText(0, 0, 2);
+        display.print(timeToSet);
+        display.print(": ");
+        display.print(myTime);
+        display.display();
+    }
+}
+
+//////////////////////////////////////////////////
+// Alarm stuff
+//////////////////////////////////////////////////
+void myAlarm()
+{
+    display.clearDisplay();
+    prepText(0, 0, 2);
+    display.print("Dispensing!");
+    display.display();
+    Serial.println("Dispensing!");
+    
+    stepper.move(stepsToTurn);
+}
+
+void setMyTime()
+{
+    Serial.println();
     Serial.print("hour: ");
     Serial.println(myHour);
     Serial.print("minute: ");
@@ -48,37 +195,51 @@ void setup() {
     setTime(myHour, myMinute, 0, 1, 1, 11);
 
     Alarm.alarmRepeat(8, 0, 5, myAlarm);
-    Alarm.alarmRepeat(7, 0, 5, myAlarm);
-    Alarm.alarmRepeat(9, 0, 5, myAlarm);
-
 }
 
 //////////////////////////////////////////////////
-// Main Loop
+// Clock Display Stuff
 //////////////////////////////////////////////////
-void loop() {
-    int value = checkEncoder();
-    digitalClockDisplay();
+void digitalClockDisplay()
+{
+    // digital clock display of the time
 
-  if(value != 0) {
-      Serial.println(value);
-  }
+    if (lastSecond != second())
+    {
+        lastSecond = second();
+        // Serial.print(hour());
+        // printDigits(minute());
+        // printDigits(second());
+
+        display.clearDisplay();
+        prepText(0, 0, 2);
+        Serial.print(hour());
+        display.print(hour());
+        display.print(printDigits(minute()));
+        display.print(printDigits(second()));
+        display.display();
+
+        Serial.println();
+    }
 }
 
-
-
+String printDigits(int digits)
+{
+    String myString = ":";
+    Serial.print(":");
+    if (digits < 10)
+    {
+        myString += '0';
+        Serial.print('0');
+    }
+    myString += digits;
+    Serial.print(digits);
+    return myString;
+}
 
 //////////////////////////////////////////////////
 // Todo
 //////////////////////////////////////////////////
-// boot
-// enter hour
-// click
-// enter minute
-// click
-// enter dispense amount
-// click
-// 
 // display clock
 // hold 2s to dispense now?
 // click does what?

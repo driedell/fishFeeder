@@ -36,6 +36,7 @@
 
 
 // AlarmId id;
+// int lastSecond = -1;
 
 // void setup() {
 //   Serial.begin(9600);
@@ -52,7 +53,7 @@
 
 // void loop() {
 //   digitalClockDisplay();
-//   Alarm.delay(1000); // wait one second between clock display
+//   Alarm.delay(200); // wait one second between clock display
 // }
 
 // // functions to be called when an alarm triggers:
@@ -60,13 +61,17 @@
 //   Serial.println("Alarm: - turn lights off");
 // }
 
-
 // void digitalClockDisplay() {
-//   // digital clock display of the time
-//   Serial.print(hour());
-//   printDigits(minute());
-//   printDigits(second());
-//   Serial.println();
+
+//     if (lastSecond != second())
+//     {
+//         lastSecond = second();
+//         // digital clock display of the time
+//         Serial.print(hour());
+//         printDigits(minute());
+//         printDigits(second());
+//         Serial.println();
+//     }
 // }
 
 // void printDigits(int digits) {
