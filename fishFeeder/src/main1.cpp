@@ -16,7 +16,9 @@
 int myHour;
 int myMinute;
 int lastSecond = -1;
-int stepsToTurn = 2000;
+int stepsToTurn = 1800;
+int displayScreen = 0;
+int displayScreenCount = 2;
 
 //////////////////////////////////////////////////
 // Set up timer
@@ -41,13 +43,14 @@ void setup()
     Timer1.attachInterrupt(timerIsr);
 
     encoder.setAccelerationEnabled(false);
+    encoder.setHoldTime(2000);
     oldEncPos = 0;
 
     display.begin(SSD1306_SWITCHCAPVCC);
 
     display.clearDisplay();
     myHour = setTime(23, "Hour");
-    myMinute = setTime(59, "Minute");
+    myMinute = setTime(59, "Min");
 
     display.clearDisplay();
 
@@ -62,12 +65,44 @@ void setup()
 void loop()
 {
     int value = checkEncoder();
-    digitalClockDisplay();
-    Alarm.delay(1000);
 
-    if (value != 0)
+    switch (displayScreen)
     {
+    case 0:
+        digitalClockDisplay();
+        break;
+    case 1:
+        logoDisplay();
+        break;
+
+    default:
+        break;
+    }
+
+    Alarm.delay(100);
+
+    switch (value)
+    {
+    case 1:
+    case 2:
+    case 4:
+    case 6:
         Serial.println(value);
+        break;
+    case 5:
+        Serial.println(value);
+
+        displayScreen++;
+        if (displayScreen >= displayScreenCount)
+        {
+            displayScreen = 0;
+        }
+        break;
+    case 3:
+        dispense();
+        break;
+    default:
+        break;
     }
 }
 
@@ -121,7 +156,6 @@ int checkEncoder()
             break;
         }
     }
-
     return temp;
 }
 
@@ -163,8 +197,11 @@ int setTime(int upperLimit, String timeToSet)
 
         display.clearDisplay();
         prepText(0, 0, 2);
+        display.print("Set ");
         display.print(timeToSet);
-        display.print(": ");
+        display.print(":");
+
+        prepText(0, 18, 2);
         display.print(myTime);
         display.display();
     }
@@ -173,14 +210,14 @@ int setTime(int upperLimit, String timeToSet)
 //////////////////////////////////////////////////
 // Alarm stuff
 //////////////////////////////////////////////////
-void myAlarm()
+void dispense()
 {
     display.clearDisplay();
     prepText(0, 0, 2);
     display.print("Dispensing!");
     display.display();
     Serial.println("Dispensing!");
-    
+
     stepper.move(stepsToTurn);
 }
 
@@ -194,7 +231,7 @@ void setMyTime()
 
     setTime(myHour, myMinute, 0, 1, 1, 11);
 
-    Alarm.alarmRepeat(8, 0, 5, myAlarm);
+    Alarm.alarmRepeat(8, 0, 5, dispense);
 }
 
 //////////////////////////////////////////////////
@@ -207,12 +244,13 @@ void digitalClockDisplay()
     if (lastSecond != second())
     {
         lastSecond = second();
-        // Serial.print(hour());
-        // printDigits(minute());
-        // printDigits(second());
 
         display.clearDisplay();
+
         prepText(0, 0, 2);
+        display.print("H. Farms");
+
+        prepText(0, 18, 2);
         Serial.print(hour());
         display.print(hour());
         display.print(printDigits(minute()));
@@ -235,6 +273,18 @@ String printDigits(int digits)
     myString += digits;
     Serial.print(digits);
     return myString;
+}
+
+//////////////////////////////////////////////////
+// logoDisplay
+//////////////////////////////////////////////////
+void logoDisplay()
+{
+    // add code to display the Heyward Farms Logo
+    display.clearDisplay();
+    prepText(0, 0, 2);
+    display.print("HFarms Logo");
+    display.display();
 }
 
 //////////////////////////////////////////////////

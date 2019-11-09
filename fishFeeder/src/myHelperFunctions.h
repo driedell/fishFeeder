@@ -16,11 +16,12 @@ int checkEncoder();
 void prepText(int, int, int);
 int setTime(int, String);
 // void setMinute();
-void myAlarm();
+void dispense();
 void digitalClockDisplay();
 String printDigits(int);
 void timerIsr();
 void setMyTime();
+void logoDisplay();
 
 //////////////////////////////////////////////////
 // OLED Stuff
@@ -43,6 +44,7 @@ uint8_t buttonState;
 #define STEPS 4
 
 ClickEncoder encoder(pinA, pinB, pinSw, STEPS);
+
 
 // //////////////////////////////////////////////////
 // // Global Variables

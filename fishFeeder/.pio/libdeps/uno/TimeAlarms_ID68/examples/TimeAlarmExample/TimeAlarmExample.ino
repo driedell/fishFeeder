@@ -26,7 +26,7 @@ void setup() {
   setTime(8,29,0,1,1,11); // set time to Saturday 8:29:00am Jan 1 2011
 
   // create the alarms, to trigger at specific times
-  Alarm.alarmRepeat(8,29,12, myAlarm);  // 8:30am every day
+  Alarm.alarmRepeat(8,29,12, dispense);  // 8:30am every day
 //  Alarm.alarmRepeat(17,45,0,EveningAlarm);  // 5:45pm every day
 //  Alarm.alarmRepeat(dowSaturday,8,30,30,WeeklyAlarm);  // 8:30:30 every Saturday
 //
@@ -42,7 +42,7 @@ void loop() {
 }
 
 // functions to be called when an alarm triggers:
-void myAlarm() {
+void dispense() {
   Serial.println("Alarm: - turn lights off");
 }
 
