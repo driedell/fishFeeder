@@ -1,0 +1,51 @@
+{
+    "name": "StepperDriver", 
+    "version": "1.2.0", 
+    "keywords": [
+        "device", 
+        "control"
+    ], 
+    "description": "A4988, DRV8825 and generic two-pin stepper motor driver library.", 
+    "frameworks": [
+        "arduino"
+    ], 
+    "platforms": [
+        "atmelavr", 
+        "atmelsam", 
+        "espressif32", 
+        "espressif8266", 
+        "intel_arc32", 
+        "microchippic32", 
+        "nordicnrf51", 
+        "nordicnrf52", 
+        "ststm32", 
+        "ststm8", 
+        "teensy", 
+        "timsp430"
+    ], 
+    "authors": [
+        {
+            "email": null, 
+            "url": null, 
+            "maintainer": true, 
+            "name": "Laurentiu Badea"
+        }
+    ], 
+    "repository": {
+        "type": "git", 
+        "url": "https://github.com/laurb9/StepperDriver"
+    }, 
+    "homepage": null, 
+    "export": {
+        "include": null, 
+        "exclude": [
+            "extras", 
+            "docs", 
+            "tests", 
+            "test", 
+            "*.doxyfile", 
+            "*.pdf"
+        ]
+    }, 
+    "id": 1272
+}
