@@ -38,9 +38,9 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 int16_t oldEncPos, encPos;
 uint8_t buttonState;
 
-#define pinA 4
+#define pinA 6
 #define pinB 5
-#define pinSw 6 //switch
+#define pinSw 4 //switch
 #define STEPS 4
 
 ClickEncoder encoder(pinA, pinB, pinSw, STEPS);
@@ -67,9 +67,9 @@ ClickEncoder encoder(pinA, pinB, pinSw, STEPS);
 #define MICROSTEPS 1
 
 // All the wires needed for full functionality
-#define DIR 8
-// #define STEP 9
-#define STEP LED_BUILTIN
+#define DIR A7
+#define STEP A6
+// #define STEP LED_BUILTIN
 
 //Uncomment line to use enable/disable functionality
 //#define SLEEP 13
